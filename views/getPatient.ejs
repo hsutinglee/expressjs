@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GetPatient</title>
+    <link rel="stylesheet" href="/styles/style.css">
+    <!-- Boxicons CDN Link -->
+    <link href="https://unpkg.com/boxicons@2.0.9/css/boxicons.min.css" rel="stylesheet" />
+</head>
+
+<body>
+    <div class="sidebar">
+        <div class="logo_content">
+            <a href="/index.html">
+                <div class="logo">
+                    <i class="bx bx-buildings"></i>
+                    <div class="logo_name">HIS</div>
+                </div>
+            </a>
+        </div>
+        <ul class="nav_list">
+            <li>
+                <a href="/dashboard.html">
+                    <i class="bx bx-grid-alt"></i>
+                    <span class="links_name">Dashboard</span>
+                </a>
+            </li>
+            <li>
+                <a href="/addPatient.html">
+                    <i class="bx bx-user-plus"></i>
+                    <span class="links_name">New Patient</span>
+                </a>
+            </li>
+            <li>
+                <a href="http://127.0.0.1:3000/">
+                    <i class="bx bx-list-ul"></i>
+                    <span class="links_name">Patient List</span>
+                </a>
+            </li>
+            <li>
+                <a href="#">
+                    <i class="bx bx-cog"></i>
+                    <span class="links_name">Setting</span>
+                </a>
+            </li>
+        </ul>
+    </div>
+    <div class="content">
+        <form id="getPatient" method="POST" action="http://127.0.0.1:3000/GetPatient">
+            <div>
+                <h3>
+                    <label for="name">病患身分證:</label>
+                </h3>
+                <input type="text" name="identifier" id="identifier">
+            </div>
+            <input id="send" type="submit" value="送出">
+        </form>
+    </div>
+</body>
+
+</html>

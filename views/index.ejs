@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>homePage</title>
+    <link rel="stylesheet" href="/styles/style.css">
+    <!-- Boxicons CDN Link -->
+    <link href="https://unpkg.com/boxicons@2.0.9/css/boxicons.min.css" rel="stylesheet" />
+</head>
+
+<body>
+    <div class="sidebar">
+        <div class="logo_content">
+            <a href="/index.html">
+                <div class="logo">
+                    <i class="bx bx-buildings"></i>
+                    <div class="logo_name">HIS</div>
+                </div>
+            </a>
+        </div>
+        <ul class="nav_list">
+            <li>
+                <a href="/dashboard.html">
+                    <i class="bx bx-grid-alt"></i>
+                    <span class="links_name">Dashboard</span>
+                </a>
+            </li>
+            <li>
+                <a href="/addPatient.html">
+                    <i class="bx bx-user-plus"></i>
+                    <span class="links_name">New Patient</span>
+                </a>
+            </li>
+            <li>
+                <a href="http://127.0.0.1:3000/">
+                    <i class="bx bx-list-ul"></i>
+                    <span class="links_name">Patient List</span>
+                </a>
+            </li>
+            <li>
+                <a href="#">
+                    <i class="bx bx-cog"></i>
+                    <span class="links_name">Setting</span>
+                </a>
+            </li>
+        </ul>
+    </div>
+    <div class="content main">
+        <table>
+            <tr>
+                <th>id</th>
+                <td><%= data.id %></td>
+            </tr>
+            <tr>
+                <th>身分證字號</th>
+                <td><%= data.identifier[0].value %></td>
+            </tr>
+            <tr>
+                <th>性別</th>
+                <td><%= data.gender %></td>
+            </tr>
+            <tr>
+                <th>出生年月日</th>
+                <td><%= data.birthDate %></td>
+            </tr>
+            <tr>
+                <th>查看</th>
+                <td>
+                    <button class="" onclick="getPatient()">查看</button>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+</body>
+
+</html>
