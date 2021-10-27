@@ -26,29 +26,76 @@ app.get("/", (req, res) => {
     res.render("getPatient.ejs");
 });
 
-app.post("/GetPatient", urlencodedParser, (req, res) => {
-    let identifier = req.body.identifier;
+app.get("/GetPatient", (req, res) => {
+    let identifier = req.query.identifier;
     if (identifier == "") {
         res.sendFile(__dirname + "/errpage.html");
-    }
-    // let url = `https://hapi.fhir.tw/fhir/Patient?identifier=${identifier}`;
-    let url1 = `http://140.123.173.244:8080/fhir/Patient?identifier=${identifier}`;
+    } else {
+        // let url = `https://hapi.fhir.tw/fhir/Patient?identifier=${identifier}`;
+        let url1 = `http://140.123.173.244:8080/fhir/Patient?identifier=${identifier}`;
 
-    var data;
+        let data;
 
-    axios
-        .get(url1)
-        .then((response) => {
-            let patientList = response.data.entry;
-            patientList.map(entry => {
-                data = entry.resource;
-                console.log(data);
-                res.setHeader('Content-Type', 'text/html');
-                res.render("index.ejs", {
-                    data
+        axios
+            .get(url1)
+            .then((response) => {
+                let patientList = response.data.entry;
+                patientList.map(entry => {
+                    data = entry.resource;
+                    console.log(data);
+                    res.setHeader('Content-Type', 'text/html');
+                    res.render("index.ejs", {
+                        data
+                    });
                 });
+            })
+            .catch((error) => {
+                console.error(error);
             });
+    }
+});
+
+app.post("/AddNewPatient", urlencodedParser, (req, res) => {
+    let id = req.body.identifier;
+
+    // let url = `https://hapi.fhir.tw/fhir/Patient?identifier=${identifier}`;
+    let url1 = `http://140.123.173.244:8080/fhir/Observation?subject=${id}`;
+
+    const fhirdata = {
+        resourceType: 'Patient',
+        identifier: [{
+            use: 'usual',
+            type: {
+                text: '身分證字號'
+            },
+            value: $('#identifier').val(),
+            assigner: {
+                display: '內政部'
+            }
+        }],
+        active: true,
+        name: [{
+            text: $('#name').val()
+        }],
+        gender: ($('#gender-male:checked').val()) ? 'male' : 'female',
+        birthDate: $('#birthDate').val(),
+        address: [{
+            use: 'home',
+            text: $('#address').val() || ''
+        }],
+        telecom: [{
+            use: 'home',
+            system: 'phone',
+            value: $('#telecom').val() || ''
+        }]
+    };
+
+    axios({
+            method: 'post',
+            url: url1,
+            data: fhirdata
         })
+        .then((response) => console.log(response))
         .catch((error) => {
             console.error(error);
         });
