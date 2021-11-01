@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Home</title>
+  <link rel="stylesheet" href="styles/style.css" />
+  <!-- Boxicons CDN Link -->
+  <link href="https://unpkg.com/boxicons@2.0.9/css/boxicons.min.css" rel="stylesheet" />
+  <!-- FHIR Script -->
+  <script src="/getPatient.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.20.0/axios.js"></script>
+  <!-- D3 Script -->
+  <script src="http://d3js.org/d3.v3.min.js" charset="utf-8"></script>
+</head>
+
+<body>
+  <div class="sidebar">
+    <div class="logo_content">
+      <a href="/index.html">
+        <div class="logo">
+          <i class="bx bx-buildings"></i>
+          <div class="logo_name">HIS</div>
+        </div>
+      </a>
+    </div>
+    <ul class="nav_list">
+      <li>
+        <a href="/dashboard.html">
+          <i class="bx bx-grid-alt"></i>
+          <span class="links_name">Dashboard</span>
+        </a>
+      </li>
+      <li>
+        <a href="/addPatient.html">
+          <i class="bx bx-user-plus"></i>
+          <span class="links_name">New Patient</span>
+        </a>
+      </li>
+      <li>
+        <a href="/getPatient.html">
+          <i class="bx bx-list-ul"></i>
+          <span class="links_name">Patient List</span>
+        </a>
+      </li>
+      <li>
+        <a href="#">
+          <i class="bx bx-cog"></i>
+          <span class="links_name">Setting</span>
+        </a>
+      </li>
+    </ul>
+  </div>
+  <div class="content"></div>
+  <div class="chart"></div>
+  <script>
+    const testapi = "	https://hapi.fhir.tw/fhir/Patient/";
+
+    let genderlist = [0, 0];
+    let age = [];
+    let agenum = [];
+    let today = new Date();
+    let year = today.getFullYear();
+    let hasyear = false;
+
+    axios
+      .get(testapi)
+      .then((response) => {
+        let patientList = response.data.entry;
+
+        patientList.map((entry) => {
+          var genderdata = entry.resource.gender;
+          var agedata = entry.resource.birthDate;
+
+          if (genderdata == "male") {
+            genderlist[0] += 1;
+          } else if (genderdata == "female") {
+            genderlist[1] += 1;
+          }
+
+          if (agedata != undefined) {
+            year = year - agedata.substr(0, 4);
+
+            for (let i = 0; i <= age.length; i++) {
+              if (age[i] == year) {
+                agenum[i] += 1;
+                hasyear = true;
+                break;
+              }
+            }
+            if (hasyear == false) {
+              age[age.length] = year;
+              agenum[agenum.length] = 1;
+            }
+            hasyear = false;
+            year = today.getFullYear();
+          }
+        });
+
+        console.log(genderlist); //男女人數
+        console.log(age);
+        console.log(agenum);
+        //男女比
+        var g1 = svg
+          .selectAll("g")
+          .data(pie(genderlist))
+          .enter()
+          .append("g")
+          //實際畫圓的方式是以SVG圖形路徑（Path）來繪製
+          .append("path")
+          //路徑的部份要設定在d屬性中，所以套入arc1函數，
+          //d3.js會依據資料配合arc1函數產出Path所需的路徑
+          .attr("d", arc1)
+          .style("fill", function (d) {
+            return color(d.data);
+          });
+      })
+      .catch((error) => {
+        console.error(error);
+      });
+
+    var svg = d3
+      .select(".content")
+      .append("svg")
+      .attr("width", 800)
+      .attr("height", 800)
+      .append("g")
+      //因為原點座標0,0在左上角，所以必須位移到指定的位置上，
+      //否則會因為在畫圓時，圓心座標在0,0而導致部份圖形被裁切。
+      //位移就是在原本的座標上加上移動的數值。
+      .attr("transform", "translate(150,150)");
+
+    //定義顏色
+    var color = d3.scale.ordinal().range(["#abc5c5", "#6a456c", "#66FF66"]);
+
+    //繪製圖餅圖，必備的三個：
+    //d3.svg.arc()
+    //d3.layout.pie()
+    //.append("path")
+
+    //利用arc來產生圓形的accessor函數，
+    //函數包含有內、外圓的角度起迄，
+    //內、外圓的半徑
+    var arc1 = d3.svg
+      .arc()
+      //設定內、外圓形的半徑大小
+      .outerRadius(100)
+      .innerRadius(0);
+
+    //建立一個layout pie物件，無排序
+    var pie = d3.layout.pie().sort(null);
+
+    // 直方圖
+
+    d3.select(".chart")
+      .selectAll('div')
+      .data(agenum)
+      .enter()
+      .append('div')
+      .html(function (d) {
+        // .html() 類似 .innerHTML，D3 允許 SVG 跟 HTML 標籤混用
+        return d.name + '<br>' + d.num
+      })
+      .style("height", function (d) {
+        return d.num + 'px' // 調整每個長條的高度
+      });
+  </script>
+</body>
+
+</html>

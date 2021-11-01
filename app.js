@@ -26,6 +26,35 @@ app.get("/", (req, res) => {
     res.render("getPatient.ejs");
 });
 
+app.get("/dashboard", (req, res) => {
+    let url1 = "http://140.123.173.244:8080/fhir/Patient";
+    let genderlist = [0, 0];
+    let age = [];
+    let agenum = [];
+    let today = new Date();
+    let year = today.getFullYear();
+    let hasyear = false;
+
+    let data;
+
+    axios
+        .get(url1)
+        .then((response) => {
+            let patientList = response.data.entry;
+            patientList.map(entry => {
+                data = entry.resource;
+                console.log(data);
+                res.setHeader('Content-Type', 'text/html');
+                res.render("index.ejs", {
+                    data
+                });
+            });
+        })
+        .catch((error) => {
+            console.error(error);
+        });
+});
+
 app.get("/GetPatient", (req, res) => {
     let identifier = req.query.identifier;
     if (identifier == "") {
