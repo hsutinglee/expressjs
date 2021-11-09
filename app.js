@@ -36,7 +36,6 @@ app.get("/a", (req, res) => {
 app.get("/test", (req, res) => {
     let url1 = "https://hapi.fhir.tw/fhir/Patient";
     let genderlist = [0, 0, 0];
-
     async function queryData() {
         let ret = await axios.get(url1);
 
@@ -44,11 +43,62 @@ app.get("/test", (req, res) => {
     }
 
     queryData().then(ret => {
+        let patientList = ret.entry;
+        let patientNum = ret.link;
 
+        patientList.map(entry => {
+            var genderdata = entry.resource.gender;
+
+            if (genderdata == "male") {
+                genderlist[0] += 1;
+            } else if (genderdata == "female") {
+                genderlist[1] += 1;
+            } else {
+                genderlist[2] += 1;
+            }
+
+        });
+
+        if (patientNum.length > 0 && patientNum[1].relation === 'next') {
+            var nexturl = patientNum[1].url;
+            nextdata(nexturl);
+        }
     });
 
-    res.send("Thanks");
+    async function nextdata(url) {
+        axios
+            .get(url)
+            .then((response) => {
+                let patientList = response.data.entry;
+                let patientNum = response.data.link;
+
+                patientList.map(entry => {
+                    var genderdata = entry.resource.gender;
+
+                    if (genderdata == "male") {
+                        genderlist[0] += 1;
+                    } else if (genderdata == "female") {
+                        genderlist[1] += 1;
+                    } else {
+                        genderlist[2] += 1;
+                    }
+                });
+
+                if (patientNum.length > 0 && patientNum[1].relation === 'next') {
+                    nexturl = patientNum[1].url;
+                    nextdata(nexturl);
+                }
+                console.log(genderlist);
+            })
+            .catch((error) => {
+                console.error(error);
+            });
+        console.log(genderlist[0]);
+        return genderlist;
+    }
+    res.send("thanks")
 });
+
 
 app.get("/dashboard", (req, res) => {
     let url1 = "https://hapi.fhir.tw/fhir/Patient";
