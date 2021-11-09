@@ -29,6 +29,10 @@ app.get("/", (req, res) => {
     res.render("getPatient.ejs");
 });
 
+app.get("/a", (req, res) => {
+    res.render("d3.ejs");
+});
+
 app.get("/test", (req, res) => {
     let url1 = "https://hapi.fhir.tw/fhir/Patient";
     let genderlist = [0, 0, 0];
@@ -192,10 +196,13 @@ app.get("/GetPatient", (req, res) => {
 });
 
 app.post("/AddNewPatient", urlencodedParser, (req, res) => {
-    let id = req.body.identifier;
+    let identifier = req.body.identifier;
+    let name = req.body.name;
+    let gender = req.body.gender;
+    let birthDate = req.body.birthDate;
 
-    // let url = `https://hapi.fhir.tw/fhir/Patient?identifier=${identifier}`;
-    let url1 = `http://140.123.173.244:8080/fhir/Observation?subject=${id}`;
+    let url = `http://140.123.173.244:9090/fhir/Patient`;
+    // let url1 = `http://140.123.173.244:9090/fhir/Observation?subject=${id}`;
 
     const fhirdata = {
         resourceType: 'Patient',
@@ -204,34 +211,31 @@ app.post("/AddNewPatient", urlencodedParser, (req, res) => {
             type: {
                 text: '身分證字號'
             },
-            value: $('#identifier').val(),
+            value: identifier,
             assigner: {
                 display: '內政部'
             }
         }],
         active: true,
         name: [{
-            text: $('#name').val()
+            text: name
         }],
-        gender: ($('#gender-male:checked').val()) ? 'male' : 'female',
-        birthDate: $('#birthDate').val(),
-        address: [{
-            use: 'home',
-            text: $('#address').val() || ''
-        }],
-        telecom: [{
-            use: 'home',
-            system: 'phone',
-            value: $('#telecom').val() || ''
-        }]
+        gender: gender,
+        birthDate: birthDate,
     };
 
     axios({
             method: 'post',
-            url: url1,
-            data: fhirdata
+            url: url,
+            data: JSON.stringify(fhirdata),
+            headers: {
+                'Content-Type': 'application/fhir+json;charset=utf-8'
+            }
         })
-        .then((response) => console.log(response))
+        .then((response) => {
+            console.log(response);
+            res.send("test");
+        })
         .catch((error) => {
             console.error(error);
         });

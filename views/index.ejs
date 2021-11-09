@@ -49,31 +49,27 @@
         </ul>
     </div>
     <div class="content main">
-        <table>
-            <tr>
-                <th>id</th>
-                <td><%= data.id %></td>
-            </tr>
-            <tr>
-                <th>身分證字號</th>
-                <td><%= data.identifier[0].value %></td>
-            </tr>
-            <tr>
-                <th>性別</th>
-                <td><%= data.gender %></td>
-            </tr>
-            <tr>
-                <th>出生年月日</th>
-                <td><%= data.birthDate %></td>
-            </tr>
-            <tr>
-                <th>查看</th>
-                <td>
-                    <button class="" onclick="getPatient()">查看</button>
-                </td>
-            </tr>
-            </tbody>
-        </table>
+        <form id="getPatient" method="POST" action="http://127.0.0.1:3000/AddNewPatient">
+            <div>
+                <label for="id">病患id:</label>
+                <input type="text" name="id" id="id" value="<%= data.id %>">
+                <br>
+                <label for="name">病患姓名:</label>
+                <input type="text" name="name" id="name" value="<%= data.name[0].text %>">
+                <br>
+                <label for="identifier">病患身分證:</label>
+                <input type="text" name="identifier" id="identifier" value="<%= data.identifier[0].value %>">
+                <br>
+                <label for="gender">性別:</label>
+                <input type="text" name="gender" id="gender" value="<%= data.gender%>">
+                <br>
+                <label for="birthDate">出生年月日:</label>
+                <input type="text" name="birthDate" id="birthDate" value="<%= data.birthDate %>">
+                <br>
+            </div>
+            <input id="send" type="submit" value="送出">
+        </form>
+
     </div>
 </body>
 
