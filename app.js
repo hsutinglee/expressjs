@@ -9,6 +9,9 @@ var urlencodedParser = bodyParser.urlencoded({
 });
 const ejs = require("ejs");
 const axios = require("axios");
+const {
+    response
+} = require("express");
 // const fetch = require("node-fetch");
 
 // middleware
@@ -26,20 +29,40 @@ app.get("/", (req, res) => {
     res.render("getPatient.ejs");
 });
 
+app.get("/test", (req, res) => {
+    let url1 = "https://hapi.fhir.tw/fhir/Patient";
+    let genderlist = [0, 0, 0];
+
+    async function queryData() {
+        let ret = await axios.get(url1);
+
+        return ret.data;
+    }
+
+    queryData().then(ret => {
+
+    });
+
+    res.send("Thanks");
+});
+
 app.get("/dashboard", (req, res) => {
     let url1 = "https://hapi.fhir.tw/fhir/Patient";
-    let genderlist = [0, 0];
+    let genderlist = [0, 0, 0];
     let age = [];
     let agenum = [];
     let today = new Date();
     let year = today.getFullYear();
     let hasyear = false;
+    var nexturl;
 
     axios
         .get(url1)
         .then((response) => {
             let patientList = response.data.entry;
+            let patientNum = response.data.link;
             console.log(response.data.total);
+
             patientList.map(entry => {
                 var genderdata = entry.resource.gender;
                 var agedata = entry.resource.birthDate;
@@ -48,6 +71,8 @@ app.get("/dashboard", (req, res) => {
                     genderlist[0] += 1;
                 } else if (genderdata == "female") {
                     genderlist[1] += 1;
+                } else {
+                    genderlist[2] += 1;
                 }
 
                 if (agedata != undefined) {
@@ -69,9 +94,13 @@ app.get("/dashboard", (req, res) => {
                 }
             });
 
+            if (patientNum.length > 0 && patientNum[1].relation === 'next') {
+                var nexturl = patientNum[1].url;
+                nextdata(nexturl);
+            }
+
             console.log(genderlist); //男女人數
-            // console.log(age);
-            // console.log(agenum);
+
             res.setHeader('Content-Type', 'text/html');
             res.render("dashboard.ejs", {
                 genderlist
@@ -80,6 +109,57 @@ app.get("/dashboard", (req, res) => {
         .catch((error) => {
             console.error(error);
         });
+
+    function nextdata(url) {
+        axios
+            .get(url)
+            .then((response) => {
+                let patientList = response.data.entry;
+                let patientNum = response.data.link;
+
+                patientList.map(entry => {
+                    var genderdata = entry.resource.gender;
+                    var agedata = entry.resource.birthDate;
+
+                    if (genderdata == "male") {
+                        genderlist[0] += 1;
+                    } else if (genderdata == "female") {
+                        genderlist[1] += 1;
+                    } else {
+                        genderlist[2] += 1;
+                    }
+
+                    if (agedata != undefined) {
+                        year = year - agedata.substr(0, 4);
+
+                        for (let i = 0; i <= age.length; i++) {
+                            if (age[i] == year) {
+                                agenum[i] += 1;
+                                hasyear = true;
+                                break;
+                            }
+                        }
+                        if (hasyear == false) {
+                            age[age.length] = year;
+                            agenum[agenum.length] = 1;
+                        }
+                        hasyear = false;
+                        year = today.getFullYear();
+                    }
+                });
+
+                if (patientNum.length > 0 && patientNum[1].relation === 'next') {
+                    nexturl = patientNum[1].url;
+                    nextdata(nexturl);
+                }
+                console.log(genderlist);
+            })
+            .catch((error) => {
+                console.error(error);
+            });
+
+    }
+
 });
 
 app.get("/GetPatient", (req, res) => {
